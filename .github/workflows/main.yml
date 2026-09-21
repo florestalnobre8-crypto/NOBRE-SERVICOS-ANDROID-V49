@@ -1,7 +1,10 @@
-name: NOBRE SERVICOS V4.10 - GERAR APK
+name: NOBRE SERVICOS V4.11 - GERAR APK
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -36,21 +39,19 @@ jobs:
       - name: Localizar APK
         shell: bash
         run: |
-          echo "Procurando APK..."
-          find build -type f -name "*.apk"
-
-          APK_PATH="$(find build -type f -name "*.apk" | head -n 1)"
+          APK_PATH="$(find build -type f -name '*.apk' | head -n 1)"
+          echo "APK encontrado: $APK_PATH"
 
           if [ -z "$APK_PATH" ]; then
             echo "Nenhum APK encontrado"
+            find build -maxdepth 8 -type f | sort
             exit 1
           fi
 
-          echo "APK encontrado: $APK_PATH"
-          cp "$APK_PATH" NOBRE_SERVICOS_V4_10.apk
+          cp "$APK_PATH" NOBRE_SERVICOS_V4_11.apk
 
       - name: Salvar APK
         uses: actions/upload-artifact@v4
         with:
-          name: NOBRE-SERVICOS-V4-10
-          path: NOBRE_SERVICOS_V4_10.apk
+          name: NOBRE-SERVICOS-V4-11
+          path: NOBRE_SERVICOS_V4_11.apk

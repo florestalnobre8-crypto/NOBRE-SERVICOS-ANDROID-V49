@@ -1,18 +1,31 @@
-NOBRE SERVIÇOS ANDROID — V4.10 APK CORRIGIDO
+NOBRE SERVIÇOS ANDROID — V4.11 BOTOES CORRIGIDOS
 
-O build da V4.9 CONSEGUIU GERAR O APK.
-O erro aconteceu somente na etapa seguinte porque o workflow procurava:
-build/outputs/apk/debug/app-debug.apk
+PROBLEMA ENCONTRADO:
+O aplicativo abria na tela principal, mas nenhuma tecla funcionava.
 
-Nesta V4.10 o workflow não depende mais do nome do arquivo.
-Ele procura automaticamente qualquer APK gerado dentro da pasta build,
-copia para:
-NOBRE_SERVICOS_V4_10.apk
-e envia em Artifacts como:
-NOBRE-SERVICOS-V4-10
+CAUSA EXATA:
+O JavaScript chamava a função isAndroidApp() logo no início do boot,
+mas essa função não existia. Isso parava o JavaScript antes de bindEvents(),
+então a tela HTML aparecia normalmente, porém sem eventos nos botões.
 
-PARA CORRIGIR NO GITHUB:
-Você pode substituir somente:
-.github/workflows/main.yml
+CORREÇÃO:
+- criada a função isAndroidApp();
+- botões Início, Mapa e Árvores recebem eventos de forma direta;
+- Sincronizar e Mais têm proteção contra elementos ausentes;
+- mantido o novo logo;
+- mantida barra inferior maior;
+- mantidos mapas offline;
+- mantido PDF direto no celular;
+- mantida sincronização rápida;
+- continua compatível com vários celulares;
+- Produção e Evolução continuam fora do Android.
 
-Ou enviar o projeto completo V4.10 por cima do repositório atual.
+NO GITHUB:
+Para corrigir o repositório atual, substitua:
+1. src/main/assets/app.js
+2. src/main/assets/index.html
+3. src/main/java/com/nobreflorestal/inventario/MainActivity.java
+4. build.gradle
+5. .github/workflows/main.yml
+
+Ou envie o projeto V4.11 completo por cima.

@@ -51,6 +51,16 @@ const MOBILE_MAP_PREF_KEY='nobre-mobile-map-pref-v40';
 
 let settingsLocked=true,mapToolsVisible=false,markerPlacementMode=false,userMapMarkers=[],compassVisible=false,currentDeviceHeading=null,trackPanelCollapsed=false,pendingMarkerGeo=null,editingMarkerId=null,longPressTimer=null,longPressTriggered=false;
 const $=id=>document.getElementById(id);
+
+function isAndroidApp(){
+  try{
+    const qs=new URLSearchParams(window.location.search||'');
+    return qs.get('android')==='1' || !!window.AndroidBridge;
+  }catch(_){
+    return !!window.AndroidBridge;
+  }
+}
+
 window.__onNativeLocation=function(lat,lon,accuracy,bearingDeg,speedMps){handleGpsUpdate({lat:Number(lat),lon:Number(lon),accuracy:Number(accuracy)||0,bearing:Number(bearingDeg)||0,speed:Number(speedMps)||0})};
 window.__onNativeHeading=function(deg){const n=Number(deg);if(Number.isFinite(n)){currentDeviceHeading=((n%360)+360)%360;updateCompassUi();drawMapSoon()}};
 
@@ -609,7 +619,7 @@ function saveSettings(){if(settingsLocked){closeSettingsDialog();return}const cf
 function openSettings(){const c=getSettings();$('apiUrl').value=c.apiUrl||'';$('syncKey').value=c.syncKey||'';updateProjectUi();updateMapBoundsInputs();setSettingsLocked(true);$('settingsDialog').showModal()}
 function buildPayload(){
   return{
-    schemaVersion:45,
+    schemaVersion:411,
     updatedAt:currentUpdatedAt||new Date().toISOString(),
     source:currentSource,
     project:{...projectMeta},
@@ -699,9 +709,18 @@ function bindEvents(){
     closeMobileMapDialog();
     showToast('Mapa escolhido. Continua disponível offline.');
   });
-  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>goScreen(b.dataset.go));
-  $('syncBtn').onclick=()=>refreshCloud(true);$('navSync').onclick=()=>refreshCloud(true);$('settingsBtn').onclick=openSettings;$('navMore').onclick=openSettings;document.querySelectorAll('.close-modal').forEach(btn=>btn.onclick=e=>{e.preventDefault();const dlg=btn.closest('dialog');if(dlg?.id==='settingsDialog')closeSettingsDialog();else closeDialogSafe(dlg)});const scb=$('settingsCloseBtn');if(scb){scb.onclick=e=>{e.preventDefault();e.stopPropagation();closeSettingsDialog()};scb.addEventListener('pointerup',e=>{e.preventDefault();e.stopPropagation();closeSettingsDialog()})}const mcx=$('markerCancelX'),mcb=$('markerCancelBtn');[mcx,mcb].forEach(b=>{if(b)b.onclick=e=>{e.preventDefault();closeDialogSafe($('markerDialog'));pendingMarkerGeo=null;editingMarkerId=null}});if($('markerSaveBtn'))$('markerSaveBtn').onclick=e=>{e.preventDefault();saveMarkerFromDialog()};if($('markerDeleteBtn'))$('markerDeleteBtn').onclick=e=>{e.preventDefault();deleteEditingMarker()};
-  $('filterMapBtn').onclick=openFilters;$('filterTreesBtn').onclick=openFilters;$('applyFiltersBtn').onclick=()=>{$('filterDialog').close();currentPage=1;applyFilters()};$('clearFiltersBtn').onclick=e=>{e.preventDefault();clearFilters()};
+  document.querySelectorAll('[data-go]').forEach(b=>{
+    b.onclick=e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      goScreen(b.dataset.go);
+    };
+  });
+  if($('syncBtn'))$('syncBtn').onclick=()=>fastRefreshV45(true);
+  if($('navSync'))$('navSync').onclick=()=>fastRefreshV45(true);
+  if($('settingsBtn'))$('settingsBtn').onclick=openSettings;
+  if($('navMore'))$('navMore').onclick=openSettings;document.querySelectorAll('.close-modal').forEach(btn=>btn.onclick=e=>{e.preventDefault();const dlg=btn.closest('dialog');if(dlg?.id==='settingsDialog')closeSettingsDialog();else closeDialogSafe(dlg)});const scb=$('settingsCloseBtn');if(scb){scb.onclick=e=>{e.preventDefault();e.stopPropagation();closeSettingsDialog()};scb.addEventListener('pointerup',e=>{e.preventDefault();e.stopPropagation();closeSettingsDialog()})}const mcx=$('markerCancelX'),mcb=$('markerCancelBtn');[mcx,mcb].forEach(b=>{if(b)b.onclick=e=>{e.preventDefault();closeDialogSafe($('markerDialog'));pendingMarkerGeo=null;editingMarkerId=null}});if($('markerSaveBtn'))$('markerSaveBtn').onclick=e=>{e.preventDefault();saveMarkerFromDialog()};if($('markerDeleteBtn'))$('markerDeleteBtn').onclick=e=>{e.preventDefault();deleteEditingMarker()};
+  if($('filterMapBtn'))$('filterMapBtn').onclick=openFilters;if($('filterTreesBtn'))$('filterTreesBtn').onclick=openFilters;$('applyFiltersBtn').onclick=()=>{$('filterDialog').close();currentPage=1;applyFilters()};$('clearFiltersBtn').onclick=e=>{e.preventDefault();clearFilters()};
   $('homeTreeSearch').addEventListener('input',renderHomeSearch);$('homeTreeClear').onclick=()=>{$('homeTreeSearch').value='';renderHomeSearch();$('homeTreeSearch').focus()};
   const ms=$('mapTreeSearch'),mb=$('mapTreeSearchBtn');if(mb)mb.onclick=findAndOpenMapTree;if(ms)ms.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();findAndOpenMapTree()}});
   const lb=$('labelsToggleBtn');if(lb)lb.onclick=toggleMapLabels;const tb=$('treesToggleBtn');if(tb)tb.onclick=toggleMapTrees;updateTreesToggle();

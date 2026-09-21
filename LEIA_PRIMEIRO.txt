@@ -1,36 +1,18 @@
-NOBRE SERVIÇOS ANDROID — V4.9 PROJETO COMPLETO
+NOBRE SERVIÇOS ANDROID — V4.10 APK CORRIGIDO
 
-ESTE PACOTE JÁ ESTÁ PRONTO PARA O GITHUB.
+O build da V4.9 CONSEGUIU GERAR O APK.
+O erro aconteceu somente na etapa seguinte porque o workflow procurava:
+build/outputs/apk/debug/app-debug.apk
 
-FAÇA SOMENTE:
-1. Extraia o ZIP.
-2. Abra a pasta extraída.
-3. Selecione TODO o conteúdo de dentro dela.
-4. Arraste tudo para o repositório GitHub.
-5. Clique em Commit changes.
+Nesta V4.10 o workflow não depende mais do nome do arquivo.
+Ele procura automaticamente qualquer APK gerado dentro da pasta build,
+copia para:
+NOBRE_SERVICOS_V4_10.apk
+e envia em Artifacts como:
+NOBRE-SERVICOS-V4-10
 
-NÃO EDITE build.gradle.
-NÃO EDITE main.yml.
-NÃO PRECISA criar workflow manualmente.
+PARA CORRIGIR NO GITHUB:
+Você pode substituir somente:
+.github/workflows/main.yml
 
-Ao fazer o commit na branch main, o GitHub Actions inicia AUTOMATICAMENTE:
-NOBRE SERVICOS V4.9 - GERAR APK
-
-Quando terminar verde, baixe em Artifacts:
-NOBRE-SERVICOS-V4-9
-
-ESTRUTURA CORRETA NA RAIZ:
-build.gradle
-settings.gradle
-gradle.properties
-src/
-.github/
-
-O app mantém:
-- NOBRE SERVIÇOS;
-- barra inferior maior;
-- mapas offline;
-- PDF direto no celular;
-- sincronização rápida;
-- vários celulares;
-- Produção e Evolução fora do Android.
+Ou enviar o projeto completo V4.10 por cima do repositório atual.

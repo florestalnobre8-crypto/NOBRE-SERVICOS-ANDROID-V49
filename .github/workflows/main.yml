@@ -33,19 +33,21 @@ jobs:
       - name: Gerar APK
         run: gradle assembleDebug --stacktrace --no-daemon
 
-      - name: Localizar e preparar APK
+      - name: Localizar APK
         shell: bash
         run: |
-          echo "Procurando APK gerado..."
-          APK_PATH="$(find build -type f -name '*.apk' | head -n 1)"
-          echo "APK encontrado: $APK_PATH"
+          echo "Procurando APK..."
+          find build -type f -name "*.apk"
+
+          APK_PATH="$(find build -type f -name "*.apk" | head -n 1)"
+
           if [ -z "$APK_PATH" ]; then
-            echo "ERRO: nenhum APK foi encontrado."
-            find build -maxdepth 6 -type f | sort
+            echo "Nenhum APK encontrado"
             exit 1
           fi
+
+          echo "APK encontrado: $APK_PATH"
           cp "$APK_PATH" NOBRE_SERVICOS_V4_10.apk
-          ls -lh NOBRE_SERVICOS_V4_10.apk
 
       - name: Salvar APK
         uses: actions/upload-artifact@v4

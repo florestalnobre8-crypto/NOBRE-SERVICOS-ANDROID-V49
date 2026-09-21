@@ -1,4 +1,4 @@
-name: NOBRE SERVICOS V4.12 - GERAR APK CORRIGIDO
+name: NOBRE SERVICOS V4.13 - SYNC RAPIDA
 
 on:
   workflow_dispatch:
@@ -11,104 +11,159 @@ jobs:
       - name: Baixar projeto
         uses: actions/checkout@v4
 
-      - name: Corrigir app antes de compilar
+      - name: Aplicar V4.13 no app
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import re
 
-          js_path = Path("src/main/assets/app.js")
-          idx_path = Path("src/main/assets/index.html")
-          java_path = Path("src/main/java/com/nobreflorestal/inventario/MainActivity.java")
-          gradle_path = Path("build.gradle")
+          js_path=Path("src/main/assets/app.js")
+          idx_path=Path("src/main/assets/index.html")
+          css_path=Path("src/main/assets/styles.css")
+          java_path=Path("src/main/java/com/nobreflorestal/inventario/MainActivity.java")
+          gradle_path=Path("build.gradle")
 
-          js = js_path.read_text(encoding="utf-8", errors="ignore")
-          marker = "const $=id=>document.getElementById(id);"
+          js=js_path.read_text(encoding="utf-8",errors="ignore")
+          idx=idx_path.read_text(encoding="utf-8",errors="ignore")
+          css=css_path.read_text(encoding="utf-8",errors="ignore")
+          java=java_path.read_text(encoding="utf-8",errors="ignore")
+          gradle=gradle_path.read_text(encoding="utf-8",errors="ignore")
 
+          # Garante correções anteriores de inicialização.
+          marker="const $=id=>document.getElementById(id);"
           if "function isAndroidApp()" not in js:
-              js = js.replace(marker, marker + r'''
+              js=js.replace(marker,marker+r'''
           function isAndroidApp(){
             try{
               const qs=new URLSearchParams(window.location.search||'');
-              return qs.get('android')==='1' || !!window.AndroidBridge;
-            }catch(_){
-              return !!window.AndroidBridge;
-            }
+              return qs.get('android')==='1'||!!window.AndroidBridge;
+            }catch(_){return !!window.AndroidBridge;}
           }
-          ''', 1)
-
+          ''',1)
           if "function loadPreviewData()" not in js:
-              js = js.replace(marker, marker + "\nfunction loadPreviewData(){ return false; }\n", 1)
+              js=js.replace(marker,marker+"\nfunction loadPreviewData(){ return false; }\n",1)
 
-          if "__nobreNavFallbackV412" not in js:
-              js = js.replace(marker, marker + r'''
-          (function(){
-            if(window.__nobreNavFallbackV412)return;
-            window.__nobreNavFallbackV412=true;
+          # Remove Sincronizar e Mais SOMENTE da barra inferior.
+          idx=re.sub(r'\s*<button id="navSync">[\s\S]*?</button>','',idx,count=1)
+          idx=re.sub(r'\s*<button id="navMore">[\s\S]*?</button>','',idx,count=1)
 
-            document.addEventListener('click',function(e){
-              try{
-                const go=e.target?.closest?.('[data-go]');
-                if(go){
-                  e.preventDefault();
-                  goScreen(go.dataset.go);
-                  return;
-                }
-                const sync=e.target?.closest?.('#navSync,#syncBtn');
-                if(sync){
-                  e.preventDefault();
-                  if(typeof fastRefreshV45==='function') fastRefreshV45(true);
-                  else if(typeof refreshCloud==='function') refreshCloud(true);
-                  return;
-                }
-                const more=e.target?.closest?.('#navMore,#settingsBtn');
-                if(more){
-                  e.preventDefault();
-                  if(typeof openSettings==='function') openSettings();
-                }
-              }catch(err){ console.warn('Fallback V4.12:',err); }
-            },true);
+          if "V4.13 — BARRA INFERIOR LIMPA" not in css:
+              css += r'''
+          /* ===== V4.13 — BARRA INFERIOR LIMPA ===== */
+          .bottom-nav{grid-template-columns:repeat(3,1fr)!important;}
+          @media(max-width:700px){
+            .bottom-nav{grid-template-columns:repeat(3,1fr)!important;}
+          }
+          '''
 
-            setTimeout(function(){
-              try{
-                if(typeof startCloudTimer==='function') startCloudTimer();
-                if(navigator.onLine && typeof fastRefreshV45==='function') fastRefreshV45(false);
-              }catch(err){ console.warn('Sync V4.12:',err); }
-            },1200);
-          })();
-          ''', 1)
+          js=re.sub(r"CLOUD_INTERVAL_MS=\d+","CLOUD_INTERVAL_MS=1000",js,count=1)
+          js=js.replace("now-__nobreLastSyncV45<1200","now-__nobreLastSyncV45<450")
 
-          js = js.replace("schemaVersion:45,", "schemaVersion:412,", 1)
-          js_path.write_text(js, encoding="utf-8")
+          old="$('syncBtn').onclick=()=>refreshCloud(true);$('navSync').onclick=()=>refreshCloud(true);$('settingsBtn').onclick=openSettings;$('navMore').onclick=openSettings;"
+          new="if($('syncBtn'))$('syncBtn').onclick=()=>fastRefreshV45(true);if($('settingsBtn'))$('settingsBtn').onclick=openSettings;"
+          js=js.replace(old,new,1)
+          js=js.replace(
+            "if($('navSync'))$('navSync').onclick=()=>fastRefreshV45(true);",
+            "",1
+          )
+          js=js.replace(
+            "if($('navMore'))$('navMore').onclick=openSettings;",
+            "",1
+          )
+          js=js.replace(
+            "$('filterMapBtn').onclick=openFilters;$('filterTreesBtn').onclick=openFilters;",
+            "if($('filterMapBtn'))$('filterMapBtn').onclick=openFilters;if($('filterTreesBtn'))$('filterTreesBtn').onclick=openFilters;",
+            1
+          )
 
-          idx = idx_path.read_text(encoding="utf-8", errors="ignore")
-          idx = re.sub(r"styles\.css\?v=\d+", "styles.css?v=412", idx)
-          idx = re.sub(r"app\.js\?v=\d+", "app.js?v=412", idx)
-          idx = re.sub(r"Versão Android [^<]+", "Versão Android 4.12 • botões + sync corrigidos • offline", idx)
-          idx_path.write_text(idx, encoding="utf-8")
+          start=js.find("async function refreshCloud(show=true){")
+          end=js.find("\nasync function loadBundledInitial()",start)
+          if start<0 or end<0:
+              raise SystemExit("refreshCloud não encontrada")
 
-          java = java_path.read_text(encoding="utf-8", errors="ignore")
-          java = re.sub(r'index\.html\?android=1&build=\d+', 'index.html?android=1&build=412', java)
-          anchor = "s.setDomStorageEnabled(true);"
-          if anchor in java and "WebSettings.LOAD_NO_CACHE" not in java:
-              java = java.replace(anchor, anchor + "\n        s.setCacheMode(WebSettings.LOAD_NO_CACHE);\n        webView.clearCache(true);", 1)
-          java_path.write_text(java, encoding="utf-8")
+          refresh=r'''async function refreshCloud(show=true){
+            const cfg=getSettings();
+            if(!cfg.apiUrl||!cfg.syncKey){
+              if(show)showToast('Sincronização automática ainda não configurada.');
+              return;
+            }
+            if(!navigator.onLine){
+              if(show)showToast('Sem internet. Os mapas continuam disponíveis offline.');
+              return;
+            }
+            try{
+              const r=await jsonp(cfg.apiUrl,{key:cfg.syncKey,_t:Date.now()});
+              if(!r?.ok||!r.payload){
+                if(show)showToast('Ainda não há atualização do PC.');
+                return;
+              }
 
-          gradle = gradle_path.read_text(encoding="utf-8")
-          gradle = re.sub(r"versionCode\s*=\s*\d+", "versionCode = 27", gradle)
-          gradle = re.sub(r"versionName\s*=\s*'[^']+'", "versionName = '4.12'", gradle)
-          gradle_path.write_text(gradle, encoding="utf-8")
+              const remoteMs=r.updatedAt?new Date(r.updatedAt).getTime():0;
+              const rawPayload=String(r.payload||'');
+              const sig=[String(r.updatedAt||''),rawPayload.length,rawPayload.slice(0,64),rawPayload.slice(-64)].join('|');
+              const lastMs=Number(localStorage.getItem('nobre-cloud-ms-v413')||0);
+              const lastSig=localStorage.getItem('nobre-cloud-sig-v413')||'';
 
-          print("V4.12 aplicada no código que será compilado.")
+              const shouldApply=!allTrees.length||!lastSig||sig!==lastSig||(remoteMs>0&&remoteMs>lastMs);
+              if(!shouldApply){
+                if(show)showToast('Você já está com a versão mais recente.');
+                return;
+              }
+
+              const decoded=await decodeCloud({encoding:r.encoding,payload:r.payload});
+              if(decoded?.syncConfig?.apiUrl&&decoded?.syncConfig?.syncKey){
+                try{
+                  localStorage.setItem('nobre-inventario-settings',JSON.stringify({
+                    apiUrl:String(decoded.syncConfig.apiUrl).trim(),
+                    syncKey:String(decoded.syncConfig.syncKey).trim()
+                  }));
+                }catch(_){}
+              }
+
+              if(Array.isArray(decoded?.data)){
+                await applyMobileMapsFromPayload(decoded,true);
+                await setData(decoded.data,decoded.updatedAt||r.updatedAt||new Date().toISOString(),decoded.source||'Nuvem PC ↔ celular',true,decoded.project||null,null);
+                await saveLocal(buildPayload());
+              }
+
+              localStorage.setItem('nobre-cloud-ms-v413',String(remoteMs||Date.now()));
+              localStorage.setItem('nobre-cloud-sig-v413',sig);
+              if(show)showToast('Atualização do PC recebida.');
+            }catch(e){
+              console.warn('Sincronização rápida V4.13:',e);
+              if(show)showToast('Não foi possível buscar a atualização.');
+            }
+          }'''
+          js=js[:start]+refresh+js[end:]
+
+          # Atualiza imediatamente quando volta ao app.
+          bind=js.find("function bindEvents(){")
+          if bind>=0 and "window.addEventListener('focus',()=>fastRefreshV45(false));" not in js:
+              p=js.find("\n",js.find("window.addEventListener('online'",bind))
+              if p>=0:
+                  js=js[:p+1]+"  window.addEventListener('focus',()=>fastRefreshV45(false));\n  window.addEventListener('pageshow',()=>fastRefreshV45(false));\n"+js[p+1:]
+
+          js=js.replace("schemaVersion:412,","schemaVersion:413,",1)
+          js=js.replace("schemaVersion:45,","schemaVersion:413,",1)
+
+          idx=re.sub(r"styles\.css\?v=\d+","styles.css?v=413",idx)
+          idx=re.sub(r"app\.js\?v=\d+","app.js?v=413",idx)
+          idx=re.sub(r"Versão Android [^<]+","Versão Android 4.13 • sync rápida • barra inferior limpa",idx)
+          java=re.sub(r'index\.html\?android=1&build=\d+','index.html?android=1&build=413',java)
+          gradle=re.sub(r"versionCode\s*=\s*\d+","versionCode = 28",gradle)
+          gradle=re.sub(r"versionName\s*=\s*'[^']+'","versionName = '4.13'",gradle)
+
+          js_path.write_text(js,encoding="utf-8")
+          idx_path.write_text(idx,encoding="utf-8")
+          css_path.write_text(css,encoding="utf-8")
+          java_path.write_text(java,encoding="utf-8")
+          gradle_path.write_text(gradle,encoding="utf-8")
+          print("V4.13 aplicada.")
           PY
 
-      - name: Conferir JavaScript corrigido
-        run: |
-          node --check src/main/assets/app.js
-          grep -n "function isAndroidApp" src/main/assets/app.js
-          grep -n "function loadPreviewData" src/main/assets/app.js
-          grep -n "__nobreNavFallbackV412" src/main/assets/app.js
+      - name: Conferir JavaScript
+        run: node --check src/main/assets/app.js
 
       - name: Configurar Java 17
         uses: actions/setup-java@v4
@@ -137,13 +192,11 @@ jobs:
         run: |
           APK_PATH="$(find build -type f -name '*.apk' | head -n 1)"
           echo "APK encontrado: $APK_PATH"
-          if [ -z "$APK_PATH" ]; then
-            exit 1
-          fi
-          cp "$APK_PATH" NOBRE_SERVICOS_V4_12.apk
+          if [ -z "$APK_PATH" ]; then exit 1; fi
+          cp "$APK_PATH" NOBRE_SERVICOS_V4_13.apk
 
       - name: Salvar APK
         uses: actions/upload-artifact@v4
         with:
-          name: NOBRE-SERVICOS-V4-12
-          path: NOBRE_SERVICOS_V4_12.apk
+          name: NOBRE-SERVICOS-V4-13
+          path: NOBRE_SERVICOS_V4_13.apk

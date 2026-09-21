@@ -1,0 +1,20 @@
+plugins {
+    id 'com.android.application' version '8.9.2'
+}
+
+android {
+    namespace = 'com.nobreflorestal.inventario'
+    compileSdk = 35
+
+    defaultConfig {
+        applicationId = 'com.nobreflorestal.inventario'
+        minSdk = 26
+        targetSdk = 35
+        versionCode = 24
+        versionName = '4.9'
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core:1.15.0'
+}

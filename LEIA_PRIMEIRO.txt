@@ -1,0 +1,36 @@
+NOBRE SERVIÇOS ANDROID — V4.9 PROJETO COMPLETO
+
+ESTE PACOTE JÁ ESTÁ PRONTO PARA O GITHUB.
+
+FAÇA SOMENTE:
+1. Extraia o ZIP.
+2. Abra a pasta extraída.
+3. Selecione TODO o conteúdo de dentro dela.
+4. Arraste tudo para o repositório GitHub.
+5. Clique em Commit changes.
+
+NÃO EDITE build.gradle.
+NÃO EDITE main.yml.
+NÃO PRECISA criar workflow manualmente.
+
+Ao fazer o commit na branch main, o GitHub Actions inicia AUTOMATICAMENTE:
+NOBRE SERVICOS V4.9 - GERAR APK
+
+Quando terminar verde, baixe em Artifacts:
+NOBRE-SERVICOS-V4-9
+
+ESTRUTURA CORRETA NA RAIZ:
+build.gradle
+settings.gradle
+gradle.properties
+src/
+.github/
+
+O app mantém:
+- NOBRE SERVIÇOS;
+- barra inferior maior;
+- mapas offline;
+- PDF direto no celular;
+- sincronização rápida;
+- vários celulares;
+- Produção e Evolução fora do Android.

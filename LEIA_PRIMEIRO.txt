@@ -1,31 +1,12 @@
-NOBRE SERVIÇOS ANDROID — V4.11 BOTOES CORRIGIDOS
+PATCH V4.11 — CORREÇÃO DOS BOTÕES
 
-PROBLEMA ENCONTRADO:
-O aplicativo abria na tela principal, mas nenhuma tecla funcionava.
+Substitua estes arquivos no repositório V49:
+- src/main/assets/app.js
+- src/main/assets/index.html
+- src/main/java/com/nobreflorestal/inventario/MainActivity.java
+- build.gradle
+- .github/workflows/main.yml
 
-CAUSA EXATA:
-O JavaScript chamava a função isAndroidApp() logo no início do boot,
-mas essa função não existia. Isso parava o JavaScript antes de bindEvents(),
-então a tela HTML aparecia normalmente, porém sem eventos nos botões.
-
-CORREÇÃO:
-- criada a função isAndroidApp();
-- botões Início, Mapa e Árvores recebem eventos de forma direta;
-- Sincronizar e Mais têm proteção contra elementos ausentes;
-- mantido o novo logo;
-- mantida barra inferior maior;
-- mantidos mapas offline;
-- mantido PDF direto no celular;
-- mantida sincronização rápida;
-- continua compatível com vários celulares;
-- Produção e Evolução continuam fora do Android.
-
-NO GITHUB:
-Para corrigir o repositório atual, substitua:
-1. src/main/assets/app.js
-2. src/main/assets/index.html
-3. src/main/java/com/nobreflorestal/inventario/MainActivity.java
-4. build.gradle
-5. .github/workflows/main.yml
-
-Ou envie o projeto V4.11 completo por cima.
+Depois faça Commit changes.
+O GitHub Actions deve rodar como:
+NOBRE SERVICOS V4.11 - GERAR APK

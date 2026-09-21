@@ -1,10 +1,7 @@
-name: NOBRE SERVICOS V4.9 - GERAR APK
+name: NOBRE SERVICOS V4.10 - GERAR APK
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 jobs:
   build:
@@ -36,11 +33,22 @@ jobs:
       - name: Gerar APK
         run: gradle assembleDebug --stacktrace --no-daemon
 
-      - name: Renomear APK
-        run: cp build/outputs/apk/debug/app-debug.apk NOBRE_SERVICOS_V4_9.apk
+      - name: Localizar e preparar APK
+        shell: bash
+        run: |
+          echo "Procurando APK gerado..."
+          APK_PATH="$(find build -type f -name '*.apk' | head -n 1)"
+          echo "APK encontrado: $APK_PATH"
+          if [ -z "$APK_PATH" ]; then
+            echo "ERRO: nenhum APK foi encontrado."
+            find build -maxdepth 6 -type f | sort
+            exit 1
+          fi
+          cp "$APK_PATH" NOBRE_SERVICOS_V4_10.apk
+          ls -lh NOBRE_SERVICOS_V4_10.apk
 
       - name: Salvar APK
         uses: actions/upload-artifact@v4
         with:
-          name: NOBRE-SERVICOS-V4-9
-          path: NOBRE_SERVICOS_V4_9.apk
+          name: NOBRE-SERVICOS-V4-10
+          path: NOBRE_SERVICOS_V4_10.apk

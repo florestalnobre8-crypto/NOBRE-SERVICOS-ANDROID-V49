@@ -1,0 +1,15 @@
+NOBRE SERVICOS V4.21
+Base: V4.20 / V4.19 / V4.16
+
+AJUSTE PRINCIPAL
+1. As árvores NÃO somem mais enquanto o mapa é girado ou recebe pinça/zoom com dois dedos.
+2. Durante o gesto, as árvores continuam visíveis em modo leve: sem rótulos e sem contorno pesado, para manter o mapa fluido.
+3. Ao soltar os dedos, o desenho completo volta imediatamente, com rótulos, marcadores e demais elementos.
+4. Mantém as melhorias da V4.20: giro/pinça mais leve, sincronização pausada durante o gesto, botão ⌗ alinhando/enquadrando e centralização alinhada.
+5. Mantém sincronização PC → celular, mapas no celular e botões de navegação da V4.19.
+6. Versão Android atualizada para 4.21 (versionCode 36).
+
+COMO USAR NO GITHUB
+- Envie todos os arquivos V421_* para a raiz do repositório.
+- Substitua .github/workflows/main.yml pelo conteúdo de V421_WORKFLOW_MAIN_YML.txt.
+- Rode o workflow “NOBRE SERVICOS V4.21 - ARVORES VISIVEIS E MAPA LISO”.

@@ -1,0 +1,22 @@
+NOBRE SERVICOS V4.22
+
+Base: V4.21.
+
+Ajustes desta versão:
+- indicador Online oculto no aplicativo;
+- pesquisa do mapa mais alta e compacta;
+- mapa ocupa uma área maior da tela;
+- barra verde/rastreio mais baixa e fina;
+- barra Início / Mapa / Árvores mais baixa e compacta;
+- árvores continuam visíveis durante giro e pinça;
+- mapas adicionados pelo próprio celular podem ser excluídos no seletor MAPAS;
+- mapas sincronizados do PC permanecem protegidos contra exclusão acidental;
+- sincronização, navegação e giro com dois dedos mantidos.
+
+Para GitHub:
+1. Envie todos os arquivos V422_* para a raiz do repositório.
+2. Copie o conteúdo de V422_WORKFLOW_MAIN_YML.txt para .github/workflows/main.yml.
+3. Em Actions, execute NOBRE SERVICOS V4.22 - MAPA MAIOR E EXCLUIR MAPA.
+4. Baixe o artefato NOBRE-SERVICOS-V4-22.
+
+AJUSTE FINAL V4.22: cursor GPS/seta permanece visível durante zoom, giro e movimento do mapa.

@@ -1,0 +1,19 @@
+NOBRE SERVICOS V4.19 — CORREÇÃO DEFINITIVA DA BASE V4.16
+
+O problema encontrado no GitHub:
+- o APK é compilado usando src/main/assets;
+- os arquivos novos tinham sido enviados para a RAIZ do repositório;
+- dentro de src/main/assets continuou a versão antiga V4.10;
+- por isso o APK continuou mostrando Sincronizar/Mais e perdeu funções de dados/mapa/navegação.
+
+PASSOS:
+1) Envie TODOS os arquivos V419_* deste pacote para a RAIZ do repositório GitHub.
+2) Abra .github/workflows/main.yml.
+3) Apague o conteúdo e cole o conteúdo de V419_WORKFLOW_MAIN_YML.txt.
+4) Commit changes.
+5) Actions > NOBRE SERVICOS V4.19 - BASE V4.16 CORRIGIDA > Run workflow.
+6) Baixe o artefato NOBRE-SERVICOS-V4-19.
+
+O workflow copia automaticamente V419_index.html, V419_app.js, V419_styles.css,
+V419_MainActivity.java e os demais arquivos para src/main antes de gerar o APK.
+Assim o GitHub não volta mais para os arquivos antigos dentro de src/main.

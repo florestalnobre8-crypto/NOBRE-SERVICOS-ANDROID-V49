@@ -267,21 +267,9 @@ function mobileMapLabel(key,m){
   return m?.fileLabel||m?.name||key||'Mapa';
 }
 function updateMobileMapBadge(){
+  // V4.18: informação de sincronização/mapas fica oculta durante o uso do mapa.
   let badge=document.getElementById('mobileMapModeBadge');
-  const title=document.querySelector('#mapScreen .map-topbar > div:first-child');
-  if(title&&!badge){
-    badge=document.createElement('span');
-    badge.id='mobileMapModeBadge';
-    badge.className='mobile-map-mode-badge';
-    title.appendChild(badge);
-  }
-  if(!badge)return;
-  const entries=mobileMapEntries();
-  if(mobileMapMode==='all'&&entries.length>=2)badge.textContent=`🗺 ${entries.length} MAPAS`;
-  else{
-    const m=mobileMaps[activeMobileMapKey];
-    badge.textContent=m?`🗺 ${mobileMapLabel(activeMobileMapKey,m)}`:'SEM MAPA';
-  }
+  if(badge){badge.hidden=true;badge.textContent='';}
 }
 async function activateMobileMap(key,fit=true,savePref=true){
   const m=mobileMaps[key];
@@ -296,15 +284,15 @@ async function activateMobileMap(key,fit=true,savePref=true){
   renderMobileMapList();
   return true;
 }
-async function activateAllMobileMaps(fit=true,savePref=true){
+async function activateAllMobileMaps(fit=true,savePref=true,notify=true){
   const entries=mobileMapEntries();
   if(entries.length<2){
     if(entries.length===1)return activateMobileMap(entries[0][0],fit,savePref);
     return false;
   }
-  showToast(`Abrindo ${entries.length} mapas juntos...`);
+  if(notify)showToast(`Abrindo ${entries.length} mapas juntos...`);
   const pkg=await buildMobileComposite(false);
-  if(!pkg){showToast('Não consegui montar os mapas juntos.');return false}
+  if(!pkg){if(notify)showToast('Não consegui montar os mapas juntos.');return false}
   mobileMapMode='all';
   mapPackage=pkg;
   mapBounds={...pkg.bounds};
@@ -312,7 +300,7 @@ async function activateAllMobileMaps(fit=true,savePref=true){
   if(savePref)saveMobileMapPref();
   updateMobileMapBadge();
   renderMobileMapList();
-  showToast(`${entries.length} mapas ativos. Funciona offline.`);
+  if(notify)showToast(`${entries.length} mapas ativos. Funciona offline.`);
   return true;
 }
 async function applyMobileMapsFromPayload(payload,preserveUserChoice=true){
@@ -369,7 +357,7 @@ async function applyMobileMapsFromPayload(payload,preserveUserChoice=true){
     :((payload?.selectedMapKey&&mobileMaps[payload.selectedMapKey])?payload.selectedMapKey:entries[0][0]);
 
   activeMobileMapKey=preferredKey;
-  if(preferredMode==='all'&&entries.length>=2)await activateAllMobileMaps(false,false);
+  if(preferredMode==='all'&&entries.length>=2)await activateAllMobileMaps(false,false,false);
   else await activateMobileMap(preferredKey,false,false);
 
   saveMobileMapPref();
@@ -522,6 +510,223 @@ function updateLabelsToggle(){const b=$('labelsToggleBtn');if(!b)return;b.classL
 function toggleMapLabels(){mapLabelsVisible=!mapLabelsVisible;localStorage.setItem('nobre-map-labels',mapLabelsVisible?'1':'0');updateLabelsToggle();drawMapSoon();showToast(mapLabelsVisible?'Numeração ligada.':'Numeração ocultada.')}
 function updateTreesToggle(){const b=$('treesToggleBtn');if(!b)return;b.classList.toggle('active',mapTreesVisible);b.title=mapTreesVisible?'Ocultar árvores':'Mostrar árvores';b.textContent=mapTreesVisible?'Árv':'Árv ×'}
 function toggleMapTrees(){mapTreesVisible=!mapTreesVisible;localStorage.setItem('nobre-map-trees',mapTreesVisible?'1':'0');updateTreesToggle();drawMapSoon();showToast(mapTreesVisible?'Árvores exibidas no mapa.':'Árvores ocultadas.')}
+/* ===== V4.18 — CORREÇÃO DA BASE V4.16 ===== */
+function currentFilters(){
+  return{
+    q:norm($('searchInput')?.value||''),
+    ut:$('utFilter')?.value||'',
+    faixa:$('faixaFilter')?.value||'',
+    status:$('statusFilter')?.value||'',
+    moto:$('motoFilter')?.value||''
+  }
+}
+function applyFilters(){
+  const f=currentFilters();
+  document.querySelectorAll('#statusChips button').forEach(b=>b.classList.toggle('active',b.dataset.status===f.status));
+  filteredTrees=allTrees.filter(t=>{
+    if(f.ut&&String(t.ut)!==f.ut)return false;
+    if(f.faixa&&String(t.faixa)!==f.faixa)return false;
+    if(f.status&&t.status!==f.status)return false;
+    if(f.moto&&String(t.motosserrista)!==f.moto)return false;
+    if(f.q&&!norm([t.ut,t.faixa,t.arvore,t.nome,t.motosserrista,t.status,t.upa,t.classificacao].join(' ')).includes(f.q))return false;
+    return true
+  });
+  const pages=Math.max(1,Math.ceil(filteredTrees.length/PAGE_SIZE));
+  if(currentPage>pages)currentPage=pages;
+  renderKpis();
+  renderTreeList();
+  renderFilterCount();
+  drawMapSoon()
+}
+function populateFilters(){
+  const add=(id,values,label)=>{
+    const s=$(id);
+    if(!s)return;
+    const cur=s.value;
+    const vals=[...new Set(values.map(v=>String(v??'').trim()).filter(Boolean))]
+      .sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true}));
+    s.innerHTML=`<option value="">${label}</option>`+vals.map(v=>`<option>${escapeHtml(v)}</option>`).join('');
+    if(vals.includes(cur))s.value=cur
+  };
+  add('utFilter',allTrees.map(x=>x.ut),'Todas');
+  add('faixaFilter',allTrees.map(x=>x.faixa),'Todas');
+  add('motoFilter',allTrees.map(x=>x.motosserrista),'Todos')
+}
+function renderKpis(){
+  const counts={};
+  Object.values(STATUS).forEach(s=>counts[s]=0);
+  allTrees.forEach(t=>counts[t.status]=(counts[t.status]||0)+1);
+  const explorar=allTrees.filter(t=>t.status===STATUS.EXPLORAR);
+  const cap=explorar.reduce((a,t)=>a+(Number(t.capNum)||numberVal(t.cap)),0);
+  if($('kpiTotal'))$('kpiTotal').textContent=allTrees.length.toLocaleString('pt-BR');
+  if($('kpiExplorar'))$('kpiExplorar').textContent=explorar.length.toLocaleString('pt-BR');
+  if($('kpiExplorarCap'))$('kpiExplorarCap').textContent=`CAP: ${cap.toLocaleString('pt-BR',{maximumFractionDigits:1})}`;
+  if($('kpiCorte'))$('kpiCorte').textContent=(counts[STATUS.CORTE]||0).toLocaleString('pt-BR');
+  if($('kpiNao'))$('kpiNao').textContent=(counts[STATUS.NAO]||0).toLocaleString('pt-BR');
+  if($('kpiArraste'))$('kpiArraste').textContent=(counts[STATUS.ARRASTE]||0).toLocaleString('pt-BR');
+  if($('kpiRomaneada'))$('kpiRomaneada').textContent=(counts[STATUS.ROMANEADA]||0).toLocaleString('pt-BR');
+  [['mkpiTotal',allTrees.length],['mkpiExplorar',explorar.length],['mkpiCorte',counts[STATUS.CORTE]||0],['mkpiNao',counts[STATUS.NAO]||0],['mkpiArraste',counts[STATUS.ARRASTE]||0],['mkpiRomaneada',counts[STATUS.ROMANEADA]||0]]
+    .forEach(([id,v])=>{const e=$(id);if(e)e.textContent=Number(v||0).toLocaleString('pt-BR')})
+}
+function renderTreeList(){
+  const pages=Math.max(1,Math.ceil(filteredTrees.length/PAGE_SIZE));
+  const start=(currentPage-1)*PAGE_SIZE;
+  const slice=filteredTrees.slice(start,start+PAGE_SIZE);
+  if($('resultCount'))$('resultCount').textContent=`${filteredTrees.length.toLocaleString('pt-BR')} árvores`;
+  if($('pageInfo'))$('pageInfo').textContent=`${currentPage} / ${pages}`;
+  if($('prevPage'))$('prevPage').disabled=currentPage<=1;
+  if($('nextPage'))$('nextPage').disabled=currentPage>=pages;
+  if($('treeList')){
+    $('treeList').innerHTML=slice.map((t,i)=>`<button class="tree-row" data-tree="${start+i}"><i class="status-dot" style="background:${STATUS_COLOR[t.status]||STATUS_COLOR[STATUS.SEM]}"></i><span class="tree-main"><strong>Árvore Nº ${escapeHtml(formatVal(t.arvore))}</strong><b>UT ${escapeHtml(formatVal(t.ut))} • Faixa ${escapeHtml(formatVal(t.faixa))}</b><small>${escapeHtml(formatVal(t.nome))} • ${escapeHtml(formatVal(t.classificacao))}</small></span><span class="tree-side"><span>${escapeHtml(t.status)}</span><i>›</i></span></button>`).join('')||'<div class="offline-info"><b>!</b><div><strong>Nenhuma árvore encontrada</strong><small>Altere a pesquisa ou os filtros.</small></div></div>';
+    document.querySelectorAll('[data-tree]').forEach(b=>b.onclick=()=>showTree(filteredTrees[Number(b.dataset.tree)]))
+  }
+}
+function renderFilterCount(){
+  const f=currentFilters(),n=[f.ut,f.faixa,f.status,f.moto].filter(Boolean).length;
+  if($('filterCount')){
+    $('filterCount').hidden=!n;
+    $('filterCount').textContent=n
+  }
+}
+function showTree(t){
+  if(!t)return;
+  if($('treeStatus')){
+    const dot=$('treeStatus').querySelector('i'),txt=$('treeStatus').querySelector('span');
+    if(dot)dot.style.background=STATUS_COLOR[t.status]||STATUS_COLOR[STATUS.SEM];
+    if(txt)txt.textContent=t.status
+  }
+  if($('treeDialogTitle'))$('treeDialogTitle').textContent=`Árvore Nº ${formatVal(t.arvore)}`;
+  if($('treeSubtitle'))$('treeSubtitle').textContent=`UT ${formatVal(t.ut)} • Faixa ${formatVal(t.faixa)} • ${formatVal(t.nome)}`;
+  const fields=[['Classificação',t.classificacao],['Nome comum',t.nome],['CAP (cm)',t.cap],['H (m)',t.h],['Motosserrista Corte',t.motosserrista],['Data do corte',t.dataCorte],['Latitude',formatCoord(t.latitude)],['Longitude',formatCoord(t.longitude)],['Motivo não efetuado',t.motivoNao],['Romaneador',t.romaneador]];
+  if($('treeDetails'))$('treeDetails').innerHTML=fields.map(([a,b])=>`<div class="detail"><span>${escapeHtml(a)}</span><strong>${escapeHtml(formatVal(b))}</strong></div>`).join('');
+  const has=validCoord(t.latitude,t.longitude);
+  if($('treeActions')){
+    $('treeActions').innerHTML=has?`<button class="nav-offline compact-nav" id="navOfflineBtn"><span class="mini-nav-icon">➤</span> Navegar offline</button><button class="maps-online" id="viewMapBtn">Ver no mapa</button><button class="maps-online" id="mapsBtn">Google Maps</button><button class="waze-online" id="wazeBtn">Waze</button>`:'<div class="offline-info"><b>!</b><div><strong>Sem coordenada válida</strong><small>Esta árvore não possui latitude/longitude válida.</small></div></div>';
+    if(has){
+      if($('navOfflineBtn'))$('navOfflineBtn').onclick=()=>{closeDialogSafe($('treeDialog'));startOfflineNavigation(t)};
+      if($('viewMapBtn'))$('viewMapBtn').onclick=()=>{closeDialogSafe($('treeDialog'));focusTreeOnMap(t)};
+      if($('mapsBtn'))$('mapsBtn').onclick=()=>openExternal(`https://www.google.com/maps/dir/?api=1&destination=${t.latitude},${t.longitude}`);
+      if($('wazeBtn'))$('wazeBtn').onclick=()=>openExternal(`https://waze.com/ul?ll=${t.latitude}%2C${t.longitude}&navigate=yes`)
+    }
+  }
+  if($('treeDialog')?.showModal)$('treeDialog').showModal()
+}
+function homeSearchMatches(q){
+  const s=cleanNumKey(q);
+  if(!s)return[];
+  const exact=allTrees.filter(t=>cleanNumKey(t.arvore)===s);
+  if(exact.length)return exact.slice(0,12);
+  return allTrees.filter(t=>cleanNumKey(t.arvore).includes(s)).slice(0,12)
+}
+function renderHomeSearch(){
+  const box=$('homeSearchResults'),input=$('homeTreeSearch');
+  if(!box||!input)return;
+  const q=input.value.trim(),clear=$('homeTreeClear');
+  if(clear)clear.hidden=!q;
+  if(!q){
+    box.innerHTML='<div class="home-search-empty"><b>Digite o número da árvore</b><small>O app procura em todas as UTs carregadas e mostra a classificação e a situação atual.</small></div>';
+    return
+  }
+  if(!allTrees.length){
+    box.innerHTML='<div class="home-search-empty"><b>Aguardando dados</b><small>Conecte o celular à internet para receber o inventário do PC.</small></div>';
+    return
+  }
+  const hits=homeSearchMatches(q);
+  if(!hits.length){
+    box.innerHTML='<div class="home-search-empty"><b>Nenhuma árvore encontrada</b><small>Confira a numeração digitada.</small></div>';
+    return
+  }
+  box.innerHTML=hits.map((t,i)=>`<button class="home-result-row" data-home-tree="${i}"><i class="result-dot" style="background:${STATUS_COLOR[t.status]||STATUS_COLOR[STATUS.SEM]}"></i><span class="home-result-main"><strong>Árvore Nº ${escapeHtml(formatVal(t.arvore))}</strong><b>UT ${escapeHtml(formatVal(t.ut))} • Faixa ${escapeHtml(formatVal(t.faixa))}</b><small>${escapeHtml(formatVal(t.nome))}</small></span><span class="home-result-side"><span class="class-badge">${escapeHtml(formatVal(t.classificacao))}</span><span class="status-badge" style="background:${STATUS_COLOR[t.status]||STATUS_COLOR[STATUS.SEM]}">${escapeHtml(t.status)}</span></span></button>`).join('');
+  box.querySelectorAll('[data-home-tree]').forEach(b=>b.onclick=()=>showTree(hits[Number(b.dataset.homeTree)]))
+}
+function focusTreeOnMap(t){
+  if(!t||!validCoord(t.latitude,t.longitude)){
+    showToast('Esta árvore não possui latitude/longitude válida.');
+    return
+  }
+  selectedTree=null;
+  goScreen('map');
+  setTimeout(()=>{
+    if(!mapState.imgReady)return;
+    const c=mapState.canvas,p=geoToImage(t.latitude,t.longitude);
+    const targetScale=Math.max(mapState.minScale*5,Math.min(mapState.maxScale,mapState.scale));
+    mapState.scale=targetScale;
+    const q=screenToBase(c.width/2,c.height/2);
+    mapState.offsetX=q.x-p.x*targetScale;
+    mapState.offsetY=q.y-p.y*targetScale;
+    drawMapSoon()
+  },80)
+}
+function findAndOpenMapTree(){
+  const input=$('mapTreeSearch');
+  if(!input)return;
+  const q=input.value.trim();
+  if(!q){
+    showToast('Digite o número da árvore.');
+    input.focus();
+    return
+  }
+  const hits=homeSearchMatches(q),exact=hits.filter(t=>cleanNumKey(t.arvore)===cleanNumKey(q));
+  if(!hits.length){
+    showToast('Árvore não encontrada neste projeto.');
+    return
+  }
+  if(exact.length>1){
+    goScreen('trees');
+    if($('searchInput'))$('searchInput').value=q;
+    if($('clearSearch'))$('clearSearch').hidden=false;
+    currentPage=1;
+    applyFilters();
+    showToast(`${exact.length} árvores com esse número. Escolha pela UT e faixa.`);
+    return
+  }
+  const t=exact[0]||hits[0];
+  if(navTarget&&navTarget!==t){
+    if(navWatchId!==null&&navigator.geolocation){
+      navigator.geolocation.clearWatch(navWatchId);
+      navWatchId=null
+    }
+    navTarget=null;
+    gpsTrail=[];
+    navigationFollow=false;
+    if($('navHud'))$('navHud').hidden=true;
+    $('myLocationBtn')?.classList.remove('tracking')
+  }
+  selectedTree=null;
+  drawMapSoon();
+  focusTreeOnMap(t);
+  setTimeout(()=>showTree(t),220)
+}
+function openExternal(url){
+  if(!navigator.onLine){
+    showToast('Sem internet. Use Navegar offline pelas coordenadas.');
+    return
+  }
+  location.href=url
+}
+function isPlanTree(t){
+  if(t?.baseExplore===true)return true;
+  const c=norm(t?.classificacao||'');
+  return c==='EXPLORAR'||c==='EXPLORAR CAP'||c==='EXPLORAR_CAP'
+}
+let mapLabelsVisible=true,mapTreesVisible=true;
+try{mapLabelsVisible=localStorage.getItem('nobre-map-labels')!=='0';mapTreesVisible=localStorage.getItem('nobre-map-trees')!=='0'}catch(_){ }
+function mapTrees(){
+  return mapTreesVisible?allTrees.filter(isPlanTree):[]
+}
+function updateSyncStatus(){
+  const el=$('syncStatus');
+  if(!el)return;
+  if(!allTrees.length){
+    el.textContent='Sem dados carregados';
+    return
+  }
+  const d=currentUpdatedAt?new Date(currentUpdatedAt):null;
+  const stamp=d&&!Number.isNaN(d.getTime())?d.toLocaleString('pt-BR'):'agora';
+  el.textContent=`${allTrees.length.toLocaleString('pt-BR')} árvores • atualizado ${stamp}`
+}
+/* ===== FIM CORREÇÃO V4.18 ===== */
+
 const mapState={canvas:null,ctx:null,img:new Image(),imgReady:false,scale:1,offsetX:0,offsetY:0,rotation:0,minScale:.1,maxScale:16,dragging:false,lastX:0,lastY:0,moved:false,raf:0};
 function normalizeBounds(b){if(!b)return null;const north=Number(b.north),south=Number(b.south),west=Number(b.west),east=Number(b.east);if(![north,south,west,east].every(Number.isFinite)||north<=south||east<=west)return null;return{north,south,west,east}}
 function treeBounds(pad=.03){const pts=(allTrees||[]).filter(t=>validCoord(t.latitude,t.longitude));if(!pts.length)return null;let north=-90,south=90,west=180,east=-180;for(const t of pts){north=Math.max(north,t.latitude);south=Math.min(south,t.latitude);west=Math.min(west,t.longitude);east=Math.max(east,t.longitude)}let dy=Math.max(north-south,.0005),dx=Math.max(east-west,.0005);return{north:north+dy*pad,south:south-dy*pad,west:west-dx*pad,east:east+dx*pad}}
@@ -832,7 +1037,7 @@ function saveSettings(){if(settingsLocked){closeSettingsDialog();return}const cf
 function openSettings(){const c=getSettings();$('apiUrl').value=c.apiUrl||'';$('syncKey').value=c.syncKey||'';updateProjectUi();updateMapBoundsInputs();setSettingsLocked(true);$('settingsDialog').showModal()}
 function buildPayload(){
   return{
-    schemaVersion:416,
+    schemaVersion:418,
     updatedAt:currentUpdatedAt||new Date().toISOString(),
     source:currentSource,
     project:{...projectMeta},

@@ -1,17 +1,18 @@
-NOBRE SERVIÇOS ANDROID V4.15
+NOBRE SERVIÇOS ANDROID V4.18 — BASE V4.16 CORRIGIDA
 
-AJUSTES:
-- mapa do celular gira com dois dedos, junto com a pinça de zoom;
-- arrastar com um dedo continua funcionando;
-- sincronização automática continua a cada 1 segundo enquanto o app está aberto;
-- corrigido o recebimento quando o PC muda a URL do Apps Script:
-  o celular segue automaticamente o "handoff" enviado pelo PC;
-- removido o bloqueio causado por URL antiga/salva;
-- timeout de endereço inválido reduzido de 30s para 5s;
-- dados novos são comparados pelo conteúdo recebido, não pela data do mapa local;
-- barra inferior continua apenas com Início, Mapa e Árvores.
+BASE:
+- V4.16 preservada.
 
-NO GITHUB:
-Troque somente .github/workflows/main.yml pelo arquivo
-main_V4_15_GIRO_SYNC_CORRIGIDA.yml, faça Commit e rode:
-NOBRE SERVICOS V4.15 - GIRO E SYNC CORRIGIDA
+CORREÇÕES:
+- restauradas as funções que faltavam na V4.16 e interrompiam a inicialização;
+- sincronização PC → celular volta a chegar ao fim do boot;
+- sincronização automática continua funcionando em segundo plano;
+- mensagens de quantidade de mapas durante a sincronização automática ficam ocultas;
+- selo “2 MAPAS”/quantidade de mapas fica oculto durante o uso normal do mapa;
+- seleção e gerenciamento de mapas continuam disponíveis na área própria;
+- giro do mapa com dois dedos e pinça de zoom permanecem ativos;
+- barra inferior e interface da V4.16 permanecem preservadas.
+
+GITHUB:
+Envie este projeto e execute o workflow:
+NOBRE SERVICOS V4.18 - BASE V4.16 CORRIGIDA

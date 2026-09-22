@@ -1,4 +1,4 @@
-name: NOBRE SERVICOS V4.16 - GERAR APK
+name: NOBRE SERVICOS V4.18 - BASE V4.16 CORRIGIDA
 
 on:
   workflow_dispatch:
@@ -42,10 +42,10 @@ jobs:
           APK_PATH="$(find build -type f -name '*.apk' | head -n 1)"
           echo "APK encontrado: $APK_PATH"
           if [ -z "$APK_PATH" ]; then exit 1; fi
-          cp "$APK_PATH" NOBRE_SERVICOS_V4_16.apk
+          cp "$APK_PATH" NOBRE_SERVICOS_V4_18.apk
 
       - name: Salvar APK
         uses: actions/upload-artifact@v4
         with:
-          name: NOBRE-SERVICOS-V4-16
-          path: NOBRE_SERVICOS_V4_16.apk
+          name: NOBRE-SERVICOS-V4-18
+          path: NOBRE_SERVICOS_V4_18.apk

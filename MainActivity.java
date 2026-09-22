@@ -212,7 +212,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        webView.loadUrl("file:///android_asset/index.html?android=1&build=416");
+        webView.loadUrl("file:///android_asset/index.html?android=1&build=418");
     }
 
     public class GpsBridge {

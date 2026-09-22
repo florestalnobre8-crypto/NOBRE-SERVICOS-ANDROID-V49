@@ -1,0 +1,17 @@
+NOBRE SERVICOS V4.20
+Base: V4.19 / V4.16
+
+CORRECOES
+1. Giro e zoom de pinça mais leves no Android.
+2. Durante o gesto de dois dedos o app prioriza somente o mapa, e redesenha árvores/marcadores ao soltar.
+3. Sincronização automática pausa durante o gesto para não causar travadas e evita descompactar o mesmo pacote repetidamente.
+4. Botão ⌗ (jogo da velha / enquadrar) alinha o mapa ao norte e enquadra novamente.
+5. Botão de centralizar também alinha antes de centralizar.
+6. Aviso genérico “O app encontrou um erro” removido; erros pontuais não interrompem a tela.
+7. Sincronização, leitura do PC, mapas no celular e botões de navegação da V4.19 foram mantidos.
+8. Versão Android atualizada para 4.20 (versionCode 35).
+
+COMO USAR NO GITHUB
+- Envie todos os arquivos V420_* para a raiz do repositório.
+- Substitua .github/workflows/main.yml pelo conteúdo de V420_WORKFLOW_MAIN_YML.txt.
+- Rode o workflow “NOBRE SERVICOS V4.20 - MAPA LISO E ESTAVEL”.

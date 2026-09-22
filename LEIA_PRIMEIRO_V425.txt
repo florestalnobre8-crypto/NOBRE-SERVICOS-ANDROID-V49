@@ -1,0 +1,10 @@
+NOBRE SERVICOS ANDROID V4.25 - FINAL
+
+BASE: V4.24
+ÚNICA ALTERAÇÃO FUNCIONAL:
+- O mapa abre sempre organizado/enquadrado como no PC, sem precisar tocar em “Usar mapa” para ajeitar.
+- A seleção de mapa recebida do PC é restaurada no celular.
+- Se a imagem do mapa ainda estiver carregando ao entrar na tela, o enquadramento fica pendente e é aplicado automaticamente assim que o mapa termina de carregar.
+- Nenhuma outra função ou visual da V4.24 foi alterado.
+
+Use o PC V45 já entregue anteriormente. Não é necessário trocar o PC novamente.

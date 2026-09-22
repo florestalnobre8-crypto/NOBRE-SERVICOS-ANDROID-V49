@@ -1,4 +1,4 @@
-name: NOBRE SERVICOS V4.20 - MAPA LISO E ESTAVEL
+name: NOBRE SERVICOS V4.21 - ARVORES VISIVEIS E MAPA LISO
 
 on:
   workflow_dispatch:
@@ -11,26 +11,26 @@ jobs:
       - name: Baixar projeto
         uses: actions/checkout@v4
 
-      - name: Aplicar arquivos V4.20 na pasta Android correta
+      - name: Aplicar arquivos V4.21 na pasta Android correta
         shell: bash
         run: |
           set -e
           mkdir -p src/main/assets
           mkdir -p src/main/java/com/nobreflorestal/inventario
-          test -f V420_index.html
-          test -f V420_app.js
-          test -f V420_styles.css
-          test -f V420_MainActivity.java
-          test -f V420_build.gradle
-          cp V420_index.html src/main/assets/index.html
-          cp V420_app.js src/main/assets/app.js
-          cp V420_styles.css src/main/assets/styles.css
-          cp V420_MainActivity.java src/main/java/com/nobreflorestal/inventario/MainActivity.java
-          cp V420_build.gradle build.gradle
-          if [ -f V420_initial_data.js ]; then cp V420_initial_data.js src/main/assets/initial_data.js; fi
-          if [ -f V420_manifest.webmanifest ]; then cp V420_manifest.webmanifest src/main/assets/manifest.webmanifest; fi
-          if [ -f V420_sw.js ]; then cp V420_sw.js src/main/assets/sw.js; fi
-          echo "Arquivos V4.20 aplicados em src/main corretamente."
+          test -f V421_index.html
+          test -f V421_app.js
+          test -f V421_styles.css
+          test -f V421_MainActivity.java
+          test -f V421_build.gradle
+          cp V421_index.html src/main/assets/index.html
+          cp V421_app.js src/main/assets/app.js
+          cp V421_styles.css src/main/assets/styles.css
+          cp V421_MainActivity.java src/main/java/com/nobreflorestal/inventario/MainActivity.java
+          cp V421_build.gradle build.gradle
+          if [ -f V421_initial_data.js ]; then cp V421_initial_data.js src/main/assets/initial_data.js; fi
+          if [ -f V421_manifest.webmanifest ]; then cp V421_manifest.webmanifest src/main/assets/manifest.webmanifest; fi
+          if [ -f V421_sw.js ]; then cp V421_sw.js src/main/assets/sw.js; fi
+          echo "Arquivos V4.21 aplicados em src/main corretamente."
 
       - name: Conferir JavaScript
         run: node --check src/main/assets/app.js
@@ -63,10 +63,10 @@ jobs:
           APK_PATH="$(find build -type f -name '*.apk' | head -n 1)"
           echo "APK encontrado: $APK_PATH"
           test -n "$APK_PATH"
-          cp "$APK_PATH" NOBRE_SERVICOS_V4_20.apk
+          cp "$APK_PATH" NOBRE_SERVICOS_V4_21.apk
 
       - name: Salvar APK
         uses: actions/upload-artifact@v4
         with:
-          name: NOBRE-SERVICOS-V4-20
-          path: NOBRE_SERVICOS_V4_20.apk
+          name: NOBRE-SERVICOS-V4-21
+          path: NOBRE_SERVICOS_V4_21.apk

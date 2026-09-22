@@ -1,0 +1,15 @@
+NOBRE SERVICOS V4.24
+
+AJUSTES PRINCIPAIS
+- Pontos das árvores permanecem pequenos e organizados durante zoom/giro.
+- Em TODOS OS MAPAS, árvores só aparecem dentro de um mapa georreferenciado válido.
+- Cursor GPS continua visível e responde mais rápido ao giro do celular.
+- Legenda colorida fica acima da barra inferior, respeitando a área segura do Android.
+- Últimos dados continuam em cache local para abrir rápido sem reler tudo.
+- Rastreio continua recolhível.
+- Detalhes aceitam Derruba, ajudante, Arraste/Skider, ajudante e Medição/Romaneio.
+
+GITHUB
+1. Envie todos os arquivos V424_* para a raiz do repositório.
+2. Copie o conteúdo de V424_WORKFLOW_MAIN_YML.txt para .github/workflows/main.yml.
+3. Em Actions, execute NOBRE SERVICOS V4.24 - MAPA ORGANIZADO E SYNC COMPLETA.

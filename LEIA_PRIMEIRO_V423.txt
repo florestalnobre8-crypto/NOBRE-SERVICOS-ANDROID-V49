@@ -1,0 +1,23 @@
+NOBRE SERVICOS V4.23
+
+Base: V4.22.
+
+Ajustes desta versão:
+- mapa mais liso no arraste, zoom e giro, sem retirar árvores, cores ou cursor;
+- cursor azul/seta acompanha a orientação do celular com resposta mais rápida;
+- centralização usa somente a área realmente visível do mapa, sem jogar o ponto para baixo das barras;
+- identificações por cor ficam lado a lado, todas visíveis;
+- última atualização continua salva no celular e abre primeiro pelo cache local; a nuvem só reaplica dados quando há atualização nova;
+- rastreio saiu da faixa inferior e ficou dentro da coluna recolhível do botão ≡;
+- detalhes da árvore mostram Derruba, Arraste/Skideiro, Medição/Romaneio e ajudantes quando existirem nos dados;
+- opção de excluir mapas adicionados no próprio celular mantida; mapas vindos do PC permanecem protegidos;
+- pesquisa alta, mapa maior, Online oculto, barra Início/Mapa/Árvores e demais ajustes da V4.22 mantidos.
+
+Para GitHub:
+1. Envie todos os arquivos V423_* para a raiz do repositório.
+2. Copie o conteúdo de V423_WORKFLOW_MAIN_YML.txt para .github/workflows/main.yml.
+3. Em Actions, execute NOBRE SERVICOS V4.23 - CAMPO LISO E GPS RESPONSIVO.
+4. Baixe o artefato NOBRE-SERVICOS-V4-23.
+
+IMPORTANTE PARA DERRUBA / ARRASTE / MEDIÇÃO:
+Use também o arquivo PC atualizado fornecido com esta versão para o computador enviar esses nomes ao celular na sincronização.

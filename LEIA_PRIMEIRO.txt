@@ -1,12 +1,17 @@
-PATCH V4.11 — CORREÇÃO DOS BOTÕES
+NOBRE SERVIÇOS ANDROID V4.15
 
-Substitua estes arquivos no repositório V49:
-- src/main/assets/app.js
-- src/main/assets/index.html
-- src/main/java/com/nobreflorestal/inventario/MainActivity.java
-- build.gradle
-- .github/workflows/main.yml
+AJUSTES:
+- mapa do celular gira com dois dedos, junto com a pinça de zoom;
+- arrastar com um dedo continua funcionando;
+- sincronização automática continua a cada 1 segundo enquanto o app está aberto;
+- corrigido o recebimento quando o PC muda a URL do Apps Script:
+  o celular segue automaticamente o "handoff" enviado pelo PC;
+- removido o bloqueio causado por URL antiga/salva;
+- timeout de endereço inválido reduzido de 30s para 5s;
+- dados novos são comparados pelo conteúdo recebido, não pela data do mapa local;
+- barra inferior continua apenas com Início, Mapa e Árvores.
 
-Depois faça Commit changes.
-O GitHub Actions deve rodar como:
-NOBRE SERVICOS V4.11 - GERAR APK
+NO GITHUB:
+Troque somente .github/workflows/main.yml pelo arquivo
+main_V4_15_GIRO_SYNC_CORRIGIDA.yml, faça Commit e rode:
+NOBRE SERVICOS V4.15 - GIRO E SYNC CORRIGIDA

@@ -1,0 +1,72 @@
+name: NOBRE SERVICOS V4.28 - MAPA EM USO FIXO
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v4
+
+      - name: Aplicar arquivos V4.28 na pasta Android correta
+        shell: bash
+        run: |
+          set -e
+          mkdir -p src/main/assets
+          mkdir -p src/main/java/com/nobreflorestal/inventario
+          test -f V428_index.html
+          test -f V428_app.js
+          test -f V428_styles.css
+          test -f V428_MainActivity.java
+          test -f V428_build.gradle
+          cp V428_index.html src/main/assets/index.html
+          cp V428_app.js src/main/assets/app.js
+          cp V428_styles.css src/main/assets/styles.css
+          cp V428_MainActivity.java src/main/java/com/nobreflorestal/inventario/MainActivity.java
+          cp V428_build.gradle build.gradle
+          if [ -f V428_initial_data.js ]; then cp V428_initial_data.js src/main/assets/initial_data.js; fi
+          if [ -f V428_manifest.webmanifest ]; then cp V428_manifest.webmanifest src/main/assets/manifest.webmanifest; fi
+          if [ -f V428_sw.js ]; then cp V428_sw.js src/main/assets/sw.js; fi
+          echo "Arquivos V4.28 aplicados em src/main corretamente."
+
+      - name: Conferir JavaScript
+        run: node --check src/main/assets/app.js
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Configurar Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Instalar SDK Android 35
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Configurar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+
+      - name: Gerar APK
+        run: gradle assembleDebug --stacktrace --no-daemon
+
+      - name: Localizar APK
+        shell: bash
+        run: |
+          APK_PATH="$(find build -type f -name '*.apk' | head -n 1)"
+          echo "APK encontrado: $APK_PATH"
+          test -n "$APK_PATH"
+          cp "$APK_PATH" NOBRE_SERVICOS_V4_28.apk
+
+      - name: Salvar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: NOBRE-SERVICOS-V4-28
+          path: NOBRE_SERVICOS_V4_28.apk

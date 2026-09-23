@@ -1,0 +1,9 @@
+NOBRE SERVICOS V4.29 - CORRECAO DE CACHE DO MAPA
+
+Esta versao mantem a logica da V4.28 e corrige o carregamento de arquivos antigos do WebView.
+- app.js/styles agora usam v=429
+- MainActivity abre build=429
+- cache de recursos do WebView e limpo sem apagar localStorage/IndexedDB
+- mapas, dados e configuracoes locais permanecem salvos
+
+Depois de instalar, abra MAPAS e toque uma vez em "Usar mapa" no mapa correto. Feche completamente e abra de novo para conferir a persistencia.

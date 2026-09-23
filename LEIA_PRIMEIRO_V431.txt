@@ -1,0 +1,4 @@
+NOBRE SERVICOS ANDROID V4.31 — POSICAO EXATA DO PC
+
+Esta versão recebe do PC V46 as posições normalizadas exatas das árvores na imagem do mapa.
+Use PC V46 + Android V4.31 juntos e faça uma sincronização após abrir o mapa correto no PC.

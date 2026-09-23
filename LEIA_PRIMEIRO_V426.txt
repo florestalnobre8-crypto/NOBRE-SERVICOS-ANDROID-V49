@@ -1,0 +1,6 @@
+NOBRE SERVICOS V4.26 FINAL
+
+Base: V4.25 aprovada.
+ÚNICA ALTERAÇÃO: no modo TODOS OS MAPAS, o Android usa o mosaico exato enviado pelo PC e salva esse mesmo mosaico no cache local. Ao fechar e abrir o app, os mapas começam organizados igual ao PC, sem recalcular a posição relativa.
+
+Nenhum outro comportamento da V4.25 foi alterado.

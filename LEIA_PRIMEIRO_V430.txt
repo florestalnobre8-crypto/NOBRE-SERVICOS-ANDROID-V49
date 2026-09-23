@@ -1,0 +1,5 @@
+NOBRE SERVICOS V4.30 - ENCAIXE IGUAL AO PC
+
+Correcao unica: no modo de um mapa, o Android usa o mapa e os limites EXATOS enviados pela tela atual do PC (payload.map), em vez de usar uma copia persistida possivelmente antiga de payload.maps.
+
+Nao altera visual, GPS, sincronizacao dos dados, botoes ou navegacao.

@@ -1,0 +1,3 @@
+NOBRE SERVICOS V4.32
+Correção única: ao abrir o app, as árvores são recalculadas somente após a imagem real do mapa carregar.
+Isso elimina o desalinhamento inicial que desaparecia depois de tocar em Usar mapa.
